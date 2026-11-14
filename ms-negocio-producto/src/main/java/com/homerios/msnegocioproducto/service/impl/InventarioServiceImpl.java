@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.homerios.msnegocioproducto.config.InventarioProperties;
 import com.homerios.msnegocioproducto.dto.MovimientoRequest;
 import com.homerios.msnegocioproducto.dto.MovimientoResponse;
 import com.homerios.msnegocioproducto.dto.StockResponse;
@@ -27,14 +28,16 @@ public class InventarioServiceImpl implements InventarioService {
 	private final MovimientoInventarioRepository movimientoRepository;
 	private final ProductoMapper productoMapper;
 	private final MovimientoMapper movimientoMapper;
+	private final InventarioProperties inventarioProperties;
 
 	public InventarioServiceImpl(ProductoRepository productoRepository,
 			MovimientoInventarioRepository movimientoRepository, ProductoMapper productoMapper,
-			MovimientoMapper movimientoMapper) {
+			MovimientoMapper movimientoMapper, InventarioProperties inventarioProperties) {
 		this.productoRepository = productoRepository;
 		this.movimientoRepository = movimientoRepository;
 		this.productoMapper = productoMapper;
 		this.movimientoMapper = movimientoMapper;
+		this.inventarioProperties = inventarioProperties;
 	}
 
 	@Override
@@ -68,6 +71,10 @@ public class InventarioServiceImpl implements InventarioService {
 	}
 
 	private MovimientoResponse registrar(TipoMovimiento tipo, MovimientoRequest request) {
+		int maxUnidades = inventarioProperties.getMaxUnidadesPorMovimiento();
+		if (request.cantidad() > maxUnidades) {
+			throw new ReglaNegocioException("Un movimiento no puede superar " + maxUnidades + " unidades");
+		}
 		Producto producto = obtenerProducto(request.productoId());
 		if (!producto.isActivo()) {
 			throw new ReglaNegocioException("El producto " + producto.getCodigo() + " está inactivo");

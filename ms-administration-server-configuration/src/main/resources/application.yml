@@ -11,4 +11,6 @@ spring:
     config:
       server: 
         native:
-          searchLocations: file:///D:/2025/FIIS\TALLER - MICROSERVICIOS/ms-administration-data-configuration
+          # CONFIG_REPO_PATH permite a cada participante apuntar a su carpeta; por defecto,
+          # ruta relativa al módulo (funciona al arrancar con gradlew bootRun desde esta carpeta).
+          search-locations: ${CONFIG_REPO_PATH:file:../ms-administration-data-configuration}
